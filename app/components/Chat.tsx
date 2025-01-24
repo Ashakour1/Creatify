@@ -1,22 +1,17 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
-import { BsGithub, BsSend } from "react-icons/bs";
-import { VscLoading } from "react-icons/vsc";
-import ReactMarkdown from "react-markdown";
+
 interface Message {
   role: "user" | "assistant";
   content: string;
   type?: "text" | "image";
 }
 
-export default function Home() {
+export default function Chat() {
   const [input, setInput] = useState("");
 
   const [messages, setMessages] = useState<Message[]>([]);
-
-  const [isGenerating, setIsGenerating] = useState(false);
 
   const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +44,6 @@ export default function Home() {
     const type = IsmagePrompt ? "image" : "text";
 
     try {
-      setIsGenerating(true);
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: {
@@ -128,11 +122,8 @@ export default function Home() {
         }
       }
 
-      setIsGenerating(false);
-
       console.log("message", messages);
     } catch (error) {
-      setIsGenerating(false);
       console.error("error", error);
     }
   };
@@ -140,30 +131,22 @@ export default function Home() {
   // console.log("input", input);
 
   return (
-    <main className="flex flex-col h-screen max-w-xl mx-auto p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="font-bold text-blue-600 text-xl">Creatify</h1>
-        <button>
-          <Link href="https://github.com/Ashakour1">
-            <BsGithub className="text-xl text-blue-600" />
-          </Link>
-        </button>
-      </div>
+    <main className="flex flex-col h-screen max-w-xl mx-auto p-4  border">
       <div className="flex-grow overflow-auto mb-4 space-y-4 pb-4">
         {messages.map((message, index) => (
           <div
             key={index}
-            className={`flex mt-2 ${
+            className={`flex ${
               message.role === "user" ? "justify-end" : "justify-start"
             }`}
           >
             <div
-              className={`max-w-[70%] p-3 rounded-lg  ${
+              className={`max-w-[70%] p-3 rounded-lg ${
                 message.role === "user" ? "bg-gray-100" : "bg-blue-100"
               }`}
             >
               <div className={`font-bold`}>
-                {message.role === "user" ? "User " : "Chat"}
+                {message.role === "user" ? "You " : "Assisant"}
               </div>
               <div
                 className={`${
@@ -171,9 +154,7 @@ export default function Home() {
                 }`}
               >
                 {message.type === "text" ? (
-                  <ReactMarkdown className="prose">
-                    {message.content}
-                  </ReactMarkdown>
+                  <p>{message.content}</p>
                 ) : (
                   <img
                     src={message.content}
@@ -197,12 +178,8 @@ export default function Home() {
           placeholder="Type a message..."
           className="flex-grow p-2 border border-gray-300 rounded outline-blue-500"
         />
-        <button
-          className={` disabled:cursor-not-allowed ${
-            isGenerating ? " bg-blue-300" : "bg-blue-600"
-          } px-4 rounded text-white hover:bg-blue-400`}
-        >
-          {isGenerating ? <VscLoading /> : <BsSend />}
+        <button className="bg-blue-600 px-4 rounded text-white hover:bg-blue-400">
+          Generate
         </button>
       </form>
     </main>
